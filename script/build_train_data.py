@@ -2,7 +2,7 @@ import os
 
 from train_data.train_data_builder import TrainDataBuilder
 
-DATA_COUNT = 50
+DATA_COUNT = 20000
 
 SRC_PATH = f"./output/processed_data/data_{DATA_COUNT}.jsonl"
 DST_PATH = f"./output/train_data/data_{DATA_COUNT}.jsonl"
