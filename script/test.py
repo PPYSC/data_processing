@@ -1,3 +1,4 @@
+from data_io.file_io import data_from_jsonl
 from filter.internal_import_filter import InternalImportFilter
 from go_tree_sitter.go_parser import GoParser
 from go_tree_sitter.go_tree_sitter_tool import GoTreeSitterTool
@@ -10,5 +11,6 @@ code = '''
 parser = GoParser()
 node = parser.parse(code)
 
-if InternalImportFilter.do_filter(node):
-    print("1")
+print(len(list(data_from_jsonl("./output/raw_data/data_30000.jsonl"))))
+
+print(len(list(data_from_jsonl("./output/raw_data/data_30000.jsonl"))))

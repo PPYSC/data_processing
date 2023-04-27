@@ -15,11 +15,11 @@ class DataProcessor:
 
         self.parser = GoParser()
 
-        self.MAX_SIZE = 6000
+        self.MAX_SIZE = 10000
 
-    def do_filter(self, code, node, size):
-        return GoTreeSitterTool.has_error(node) or \
-            size > self.MAX_SIZE or \
+    def do_filter(self, node, size):
+        return size > self.MAX_SIZE or \
+            GoTreeSitterTool.has_error(node) or \
             InternalImportFilter.do_filter(node) or \
             UndefinedBehaviorFilter.do_filter(node) or \
             False
@@ -49,8 +49,10 @@ class DataProcessor:
             src_code = self.delete_all_comment(src_line["code"])
             root_node = self.parser.parse(src_code)
 
-            if not self.do_filter(src_code, root_node, src_line["size"]):
+            src_size = len(src_code.encode("utf8"))
+
+            if not self.do_filter(root_node, src_size):
                 pass_cnt += 1
-                dst_line = {"code": src_code, "size": src_line["size"]}
+                dst_line = {"code": src_code, "size": src_size}
                 data_to_jsonl_append(self.dst_path, dst_line)
         return pass_cnt

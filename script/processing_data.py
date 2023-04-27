@@ -2,7 +2,7 @@ import os
 
 from data_processor.data_processor import DataProcessor
 
-DATA_COUNT = 50
+DATA_COUNT = 30000
 
 SRC_PATH = f"./output/raw_data/data_{DATA_COUNT}.jsonl"
 DST_PATH = f"./output/processed_data/data_{DATA_COUNT}.jsonl"
