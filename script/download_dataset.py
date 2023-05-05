@@ -14,7 +14,7 @@ CACHE_DIR = "D:\\huggingface_cache"
 dataset_loader = DatasetLoader(is_iter=STREAMING, path=DATASET_PATH, languages=LANGUAGES, split=SPLIT,
                                streaming=STREAMING, cache_dir=CACHE_DIR)
 
-DATA_COUNT = 30000
+DATA_COUNT = 71421
 SAVED_PATH = f"./output/raw_data/data_{DATA_COUNT}.jsonl"
 
 if os.path.isfile(SAVED_PATH):

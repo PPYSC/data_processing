@@ -4,11 +4,11 @@ from data_io.file_io import data_from_jsonl, data_to_jsonl_append
 
 
 class TrainDataSplitter:
-    def __init__(self, src_path, dst_path):
+    def __init__(self, src_path, dst_path, train_per):
         self.src_path = src_path
         self.dst_path = dst_path
 
-        self.train_per = 0.8
+        self.train_per = train_per
 
     def split(self):
         print(f"{'=' * 20} start splitting train data {'=' * 20}")
