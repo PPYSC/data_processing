@@ -11,4 +11,6 @@ if os.path.isfile(DST_PATH):
     os.remove(DST_PATH)
 
 train_data_builder = TrainDataBuilder(SRC_PATH, DST_PATH)
-train_data_builder.build()
+total_count = train_data_builder.build()
+
+print(f"{total_count}")

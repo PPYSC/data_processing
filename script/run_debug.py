@@ -1,14 +1,18 @@
-import os
+import torch
 
-from train_data.train_data_builder import TrainDataBuilder
+from go_generate.go_generator import GoGenerator
+from go_generate.test_case_maker import TestCaseMaker
 
-DATA_COUNT = 50
+MODEL_PATH = "PPY039/codet5-small-go_generation_v2"
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+CACHE_DIR = "D:\huggingface_cache"
 
-SRC_PATH = f"./output/processed_data/data_{DATA_COUNT}.jsonl"
-DST_PATH = f"./output/train_data/data_{DATA_COUNT}.jsonl"
+go_generator = GoGenerator(MODEL_PATH, DEVICE, CACHE_DIR)
 
-if os.path.isfile(DST_PATH):
-    os.remove(DST_PATH)
+DATA_COUNT = 71421
+SRC_PATH = f"./output/split_train_data/data_{DATA_COUNT}/test.jsonl"
+DST_PATH = f"./output/test_case/data_{DATA_COUNT}.jsonl"
 
-train_data_builder = TrainDataBuilder(SRC_PATH, DST_PATH)
-train_data_builder.build()
+test_case_maker = TestCaseMaker(SRC_PATH, DST_PATH, go_generator)
+
+test_case_maker.check()

@@ -11,6 +11,6 @@ if os.path.isfile(DST_PATH):
     os.remove(DST_PATH)
 
 data_processor = DataProcessor(SRC_PATH, DST_PATH)
-pass_cnt = data_processor.process()
+total_count = data_processor.process()
 
-print(f"Pass: {pass_cnt}/{DATA_COUNT}")
+print(f"{total_count}")

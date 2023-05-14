@@ -24,6 +24,23 @@ class DataProcessor:
             UndefinedBehaviorFilter.do_filter(node) or \
             False
 
+    def do_filter_count(self, node, size):
+        flag = False
+        count = {"over_size": 0, "has_error": 0, "internal_import": 0, "undefined_behavior": 0}
+        if size > self.MAX_SIZE:
+            flag = True
+            count["over_size"] += 1
+        if GoTreeSitterTool.has_error(node):
+            flag = True
+            count["has_error"] += 1
+        if InternalImportFilter.do_filter(node):
+            flag = True
+            count["internal_import"] += 1
+        if UndefinedBehaviorFilter.do_filter(node):
+            flag = True
+            count["undefined_behavior"] += 1
+        return flag, count
+
     def delete_all_comment(self, code):
         node = self.parser.parse(code)
 
@@ -44,15 +61,22 @@ class DataProcessor:
 
     def process(self):
         print(f"{'=' * 20} start processing raw data {'=' * 20}")
-        pass_cnt = 0
+        total_count = {"pass": 0, "over_size": 0, "has_error": 0, "internal_import": 0, "undefined_behavior": 0}
         for src_line in tqdm(data_from_jsonl(self.src_path)):
             src_code = self.delete_all_comment(src_line["code"])
             root_node = self.parser.parse(src_code)
 
             src_size = len(src_code.encode("utf8"))
 
-            if not self.do_filter(root_node, src_size):
-                pass_cnt += 1
+            flag, count = self.do_filter_count(root_node, src_size)
+            if not flag:
+                total_count["pass"] += 1
                 dst_line = {"code": src_code, "size": src_size}
                 data_to_jsonl_append(self.dst_path, dst_line)
-        return pass_cnt
+            else:
+                total_count["over_size"] += count["over_size"]
+                total_count["has_error"] += count["has_error"]
+                total_count["internal_import"] += count["internal_import"]
+                total_count["undefined_behavior"] += count["undefined_behavior"]
+
+        return total_count

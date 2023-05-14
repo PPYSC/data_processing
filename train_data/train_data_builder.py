@@ -26,6 +26,8 @@ class TrainDataBuilder:
 
     def build(self):
         print(f"{'=' * 20} start building train data {'=' * 20}")
+        total_count = {"data_count": 0, "max_input_length": 0, "max_output_length": 0, "avg_input_length": 0,
+                       "avg_output_length": 0}
         shuffle_list = []
         for src_line in tqdm(data_from_jsonl(self.src_path)):
             src_code = src_line["code"]
@@ -52,11 +54,24 @@ class TrainDataBuilder:
                 prompt = src_code.replace(function_code, "") + "\n\n" + function_signature
                 ground_truth = function_body
 
-                if self.get_token_num(prompt) <= self.MAX_INPUT_TOKEN_LEN and self.get_token_num(
-                        ground_truth) <= self.MAX_OUTPUT_TOKEN_LEN:
+                input_length = self.get_token_num(prompt)
+                output_length = self.get_token_num(ground_truth)
+
+                if input_length <= self.MAX_INPUT_TOKEN_LEN and output_length <= self.MAX_OUTPUT_TOKEN_LEN:
+                    total_count["data_count"] += 1
+                    total_count["max_input_length"] = max(total_count["max_input_length"], input_length)
+                    total_count["max_output_length"] = max(total_count["max_output_length"], output_length)
+                    total_count["avg_input_length"] += input_length
+                    total_count["avg_output_length"] += output_length
+
                     train_data_line = {"input": prompt, "output": ground_truth}
                     shuffle_list.append(train_data_line)
-        random.shuffle(shuffle_list)
 
+        random.shuffle(shuffle_list)
         for train_data_line in shuffle_list:
             data_to_jsonl_append(self.dst_path, train_data_line)
+
+        total_count["avg_input_length"] = float(total_count["avg_input_length"]) / float(total_count["data_count"])
+        total_count["avg_output_length"] = float(total_count["avg_output_length"]) / float(total_count["data_count"])
+
+        return total_count
