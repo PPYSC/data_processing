@@ -12,3 +12,6 @@ class GoGenerator:
         output = self.model.generate(input_ids=input_ids, max_new_tokens=256)
         output_text = self.tokenizer.decode(output[0], skip_special_tokens=True)
         return output_text
+
+    def get_token_num(self, input_text):
+        return len(self.tokenizer(input_text, return_tensors="pt").input_ids[0])
