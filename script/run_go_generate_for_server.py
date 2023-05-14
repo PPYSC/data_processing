@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/bigdata/qiuhan/go_generate/data_processing')
+sys.path.append('/bigdata/qiuhan/generate_go_code/data_processing')
 
 
 import torch
