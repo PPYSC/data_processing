@@ -107,30 +107,55 @@ class TestCaseMaker:
         return new_data_list
 
     def data_input_do_filter(self, data):
+        flag = False
+        count = {"has_error": 0, "undefined_behavior": 0}
+
         input_code = data["input"]
         token_len = len(self.tokenizer(input_code, return_tensors="pt").input_ids[0])
+
         if token_len > self.MAX_INPUT_TOKEN_LEN:
-            return True
+            flag = True
+            return flag, count
 
         input_node = self.parser.parse(input_code)
 
-        return GoTreeSitterTool.has_error(input_node) or \
-            UndefinedBehaviorFilter.do_filter(input_node) or \
-            False
+        if GoTreeSitterTool.has_error(input_node):
+            flag = True
+            count["has_error"] += 1
+        if UndefinedBehaviorFilter.do_filter(input_node):
+            flag = True
+            count["undefined_behavior"] += 1
+
+        return flag, count
 
     def test_case_do_filter(self, test_case):
+        flag = False
+        count = {"has_error": 0, "undefined_behavior": 0}
+
         code = test_case["input"] + test_case["output"]
         node = self.parser.parse(code)
 
-        return GoTreeSitterTool.has_error(node) or \
-            UndefinedBehaviorFilter.do_filter(node) or \
-            False
+        if GoTreeSitterTool.has_error(node):
+            flag = True
+            count["has_error"] += 1
+        if UndefinedBehaviorFilter.do_filter(node):
+            flag = True
+            count["undefined_behavior"] += 1
 
-    def make_test_case_loop(self, max_count=1):
-        test_case_count = 0
+        return flag, count
+
+    def generate_test_case(self, data):
+        input_text = data["input"]
+        output_text = self.go_generator.generate(input_text)
+        test_case = {"input": input_text, "output": output_text}
+        return test_case
+
+    def make_test_case_loop(self, max_test_case_num=1):
+        total_test_case_count = {"total_test_case": 0, "has_error": 0, "undefined_behavior": 0}
+        test_case_num = 0
         new_data_list = []
-        with tqdm(total=max_count) as pbar:
-            while test_case_count < max_count:
+        with tqdm(total=max_test_case_num) as pbar:
+            while test_case_num < max_test_case_num:
                 if len(new_data_list) != 0:
                     curr_data = new_data_list[0]
                     new_data_list = new_data_list[1:]
@@ -139,18 +164,20 @@ class TestCaseMaker:
                 else:
                     curr_data = self.get_random_data_from_origin_data()
 
-                if not self.data_input_do_filter(curr_data):
+                input_flag, input_count = self.data_input_do_filter(curr_data)
+                if not input_flag:
                     test_case = self.generate_test_case(curr_data)
-                    if not self.test_case_do_filter(test_case):
-                        test_case_count += 1
+                    test_case_flag, test_case_count = self.test_case_do_filter(test_case)
+                    total_test_case_count["total_test_case"] += 1
+                    if not test_case_flag:
+                        test_case_num += 1
                         pbar.update(1)
                         data_to_jsonl_append(self.dst_path, test_case)
 
                         self.add_data_to_test_case_cache(test_case)
                         new_data_list += self.build_new_data(test_case)
+                    else:
+                        total_test_case_count["has_error"] += test_case_count["has_error"]
+                        total_test_case_count["undefined_behavior"] += test_case_count["undefined_behavior"]
 
-    def generate_test_case(self, data):
-        input_text = data["input"]
-        output_text = self.go_generator.generate(input_text)
-        test_case = {"input": input_text, "output": output_text}
-        return test_case
+        return total_test_case_count
