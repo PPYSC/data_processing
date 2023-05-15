@@ -10,16 +10,16 @@ from go_tree_sitter.go_tree_sitter_tool import GoTreeSitterTool
 
 class TrainDataBuilder:
 
-    def __init__(self, src_path, dst_path):
+    def __init__(self, src_path, dst_path, tokenizer):
         self.src_path = src_path
         self.dst_path = dst_path
 
         self.parser = GoParser()
 
+        self.tokenizer = tokenizer
+
         self.MAX_INPUT_TOKEN_LEN = 512
         self.MAX_OUTPUT_TOKEN_LEN = 256
-
-        self.tokenizer = RobertaTokenizer.from_pretrained('Salesforce/codet5-small', cache_dir="D:\huggingface_cache")
 
     def get_token_num(self, code):
         return len(self.tokenizer(code, return_tensors="pt").input_ids[0])
