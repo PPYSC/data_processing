@@ -59,7 +59,7 @@ class TestCaseMaker:
         old_data_code = old_data["input"]
         old_data_node = self.parser.parse(old_data_code)
         old_data_function_nodes = GoTreeSitterTool.get_function_declaration(old_data_node)
-        if len(old_data_function_nodes) == 0:
+        if len(old_data_function_nodes) == 0 or len(old_data_function_nodes) == 1:
             old_data_function_code = ""
         else:
             old_data_function_code = random.choice(old_data_function_nodes).text.decode("utf8")
