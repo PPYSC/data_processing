@@ -24,6 +24,6 @@ if os.path.isfile(DST_PATH):
 test_case_maker = TestCaseMaker(SRC_PATH, DST_PATH, go_generator, tokenizer)
 
 test_case_maker.init_origin_data_list()
-total_test_case_count = test_case_maker.make_test_case_loop(5)
+total_test_case_count = test_case_maker.make_test_case_loop(20)
 
 print(f"{total_test_case_count}")

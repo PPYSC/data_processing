@@ -11,7 +11,7 @@ from go_tree_sitter.go_tree_sitter_tool import GoTreeSitterTool
 
 
 class TestCaseMaker:
-    def __init__(self, src_path, dst_path, go_generator, tokenizer, test_case_cache_size=100):
+    def __init__(self, src_path, dst_path, go_generator, tokenizer, test_case_cache_size=500):
         self.src_path = src_path
         self.dst_path = dst_path
 
@@ -159,28 +159,26 @@ class TestCaseMaker:
                 if len(new_data_list) != 0:
                     curr_data = new_data_list[0]
                     new_data_list = new_data_list[1:]
-
-                    input_flag, input_count = self.data_input_do_filter(curr_data)
-                    if not input_flag:
-                        test_case = self.generate_test_case(curr_data)
-                        total_test_case_count["total_test_case"] += 1
-
-                        test_case_flag, test_case_count = self.test_case_do_filter(test_case)
-                        if not test_case_flag:
-                            test_case_num += 1
-                            pbar.update(1)
-                            data_to_jsonl_append(self.dst_path, test_case)
-
-                            self.add_data_to_test_case_cache(test_case)
-                            new_data_list += self.build_new_data(test_case)
-                        else:
-                            total_test_case_count["has_error"] += test_case_count["has_error"]
-                            total_test_case_count["undefined_behavior"] += test_case_count["undefined_behavior"]
                 elif len(self.test_case_cache_list) != 0:
                     curr_data = self.get_random_data_from_test_case_cache()
-                    new_data_list += self.build_new_data(curr_data)
                 else:
                     curr_data = self.get_random_data_from_origin_data()
-                    new_data_list += self.build_new_data(curr_data)
+
+                input_flag, input_count = self.data_input_do_filter(curr_data)
+                if not input_flag:
+                    test_case = self.generate_test_case(curr_data)
+                    total_test_case_count["total_test_case"] += 1
+
+                    test_case_flag, test_case_count = self.test_case_do_filter(test_case)
+                    if not test_case_flag:
+                        test_case_num += 1
+                        pbar.update(1)
+                        data_to_jsonl_append(self.dst_path, test_case)
+
+                        self.add_data_to_test_case_cache(test_case)
+                        new_data_list += self.build_new_data(test_case)
+                    else:
+                        total_test_case_count["has_error"] += test_case_count["has_error"]
+                        total_test_case_count["undefined_behavior"] += test_case_count["undefined_behavior"]
 
         return total_test_case_count
