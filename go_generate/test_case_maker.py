@@ -56,7 +56,7 @@ class TestCaseMaker:
 
     def build_new_data(self, old_data):
         # get old_data_code and old_data_function_signature and old_data_function_code <- (can be "")
-        old_data_line_list = old_data["input"].splitlines()
+        old_data_line_list = old_data["input"].strip().splitlines()
         old_data_code = ""
         for line in old_data_line_list[:-1]:
             old_data_code += line + "\n"
