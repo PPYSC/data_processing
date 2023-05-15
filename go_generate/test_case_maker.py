@@ -55,11 +55,16 @@ class TestCaseMaker:
             return data
 
     def build_new_data(self, old_data):
-        # get old_data_code and old_data_function_code <- (can be "")
-        old_data_code = old_data["input"]
+        # get old_data_code and old_data_function_signature and old_data_function_code <- (can be "")
+        old_data_line_list = old_data["input"].splitlines()
+        old_data_code = ""
+        for line in old_data_line_list[:-1]:
+            old_data_code += line + "\n"
+        old_data_function_signature = old_data_line_list[-1]
+
         old_data_node = self.parser.parse(old_data_code)
         old_data_function_nodes = GoTreeSitterTool.get_function_declaration(old_data_node)
-        if len(old_data_function_nodes) == 0 or len(old_data_function_nodes) == 1:
+        if len(old_data_function_nodes) == 0:
             old_data_function_code = ""
         else:
             old_data_function_code = random.choice(old_data_function_nodes).text.decode("utf8")
@@ -95,11 +100,7 @@ class TestCaseMaker:
             new_data_list.append(new_data)
 
         # add tool_data_function_code
-        new_input = ""
-        line_list = old_data["input"].splitlines()
-        for line in line_list[:-1]:
-            new_input += line + "\n"
-        new_input += "\n" + tool_data_function_code + "\n\n" + line_list[-1]
+        new_input = old_data_function_code + "\n" + tool_data_function_code + "\n\n" + old_data_function_signature
         new_data = {"input": new_input, "output": old_data["output"]}
 
         new_data_list.append(new_data)
